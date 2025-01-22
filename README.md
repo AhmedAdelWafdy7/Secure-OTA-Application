@@ -117,6 +117,3 @@ curl -X POST -H "Authorization: Bearer <JWT>" -F "firmware=@v2.0.bin" https://ot
 
 ## 📜 License
 MIT License - See [LICENSE](LICENSE) for details.
-```
-
-To complete the MIT License setup, create a `LICENSE` file in your project root with [this standard MIT License text](https://opensource.org/license/mit/).
