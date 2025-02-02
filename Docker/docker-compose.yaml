@@ -1,0 +1,25 @@
+version : '3.8'
+services:
+  app:
+    privileged: true
+    volumes:
+      - /home/wafdunix/SDV/app:/home
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      build:
+        context: .
+        dockerfile: ./Docker/app/Dockerfile.app
+      tty: true
+      stdin_open: true
+  server:
+    privileged: true
+    volumes:
+      - /home/wafdunix/SDV/server:/home
+    network_mode: host
+    build:
+      context: .
+      dockerfile: ./Docker/server/Dockerfile.server
+    tty: true
+    stdin_open: true
