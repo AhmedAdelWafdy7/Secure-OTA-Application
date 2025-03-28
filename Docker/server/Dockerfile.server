@@ -20,4 +20,8 @@ RUN apt update && apt upgrade -y \
     pymysql \
     cryptography
 
-CMD ["python3", "main.py"]
+# Create directory for uploads
+RUN mkdir -p /home/uploads
+COPY Server/main.py /home/main.py
+WORKDIR /home
+CMD ["python3", "/home/main.py"]

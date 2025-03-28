@@ -19,7 +19,8 @@ services:
       - /home/wafdunix/SDV/server:/home
     network_mode: host
     build:
-      context: .
-      dockerfile: ./server/Dockerfile.server
+      context: ..
+      dockerfile: ./Docker/server/Dockerfile.server
+    working_dir: /home
     tty: true
     stdin_open: true
