@@ -9,19 +9,23 @@ import hashlib
 app = Flask(__name__)
 api = Api(app)
 
-UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 
 def get_mysql_connection():
-    connection = pymysql.connect(host='',
-                                    user='',
-                                    password='',
-                                    db='',
-                                    charset='utf8mb4',
-                                    cursorclass=pymysql.cursors.DictCursor)
+    connection = pymysql.connect(
+        host="",
+        user="",
+        password="",
+        db="",
+        charset="utf8mb4",
+        cursorclass=pymysql.cursors.DictCursor,
+    )
     return connection
 
-@api.route('/raw_data')
+
+@api.route("/raw_data")
 class RawData(Resource):
     def get(self):
         connection = get_mysql_connection()
@@ -40,50 +44,53 @@ class RawData(Resource):
                 overpoint_data = cursor.fetchall()
 
                 result = {
-                    'result_data': result_data,
-                    'raw_data': raw_data,
-                    'overpoint_data': overpoint_data
+                    "result_data": result_data,
+                    "raw_data": raw_data,
+                    "overpoint_data": overpoint_data,
                 }
                 return jsonify(result)
         finally:
             connection.close()
 
-@app.route('/upload', methods=['POST'])
+
+@app.route("/upload", methods=["POST"])
 def upload():
-    if 'file' not in request.files:
-        return 'No file part'
-    file = request.files['file']
-    if file.filename == '':
-        return 'No selected file'
-    
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+    print("here")
+    if "file" not in request.files:
+        return "No file part"
+
+    print("herer")
+    file = request.files["file"]
+    if file.filename == "":
+        return "No selected file"
+
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(file_path)
 
-    file_url = f"http://server_address/files/{file.filename}"
+    file_url = f"http://0.0.0.0/files/{file.filename}"
     sha256 = hashlib.sha256()
-    with open(file_path, 'rb') as f:
+    with open(file_path, "rb") as f:
         for block in iter(lambda: f.read(4096), b""):
             sha256.update(block)
-        
+
     checksum = sha256.hexdigest()
-    payload = {
-        "url": file_url,
-        "checksum": checksum
-    }
+    payload = {"url": file_url, "checksum": checksum}
 
     payload_str = json.dumps(payload)
     print(checksum)
-    publish.single("ota/update", payload_str, hostname="MQTT_ADDRESS",port=1883)
+    publish.single("ota/update", payload_str, hostname="0.0.0.0", port=1883)
 
-    return 'Upload success'
+    return "Upload success"
 
-@app.route('/files/<filename>', methods=['GET'])
+
+@app.route("/files/<filename>", methods=["GET"])
 def download(filename):
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    file_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
     if os.path.exists(file_path):
         return send_file(file_path, as_attachment=True)
     else:
-        return 'File not found', 404
-    
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=80)
+        return "File not found", 404
+
+
+if __name__ == "__main__":
+    app.run(debug=True, host="0.0.0.0", port=80)
