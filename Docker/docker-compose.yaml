@@ -1,4 +1,4 @@
-version : '3.8'
+version: '3.8'
 services:
   app:
     privileged: true
@@ -8,11 +8,11 @@ services:
     network_mode: host
     environment:
       - DISPLAY=${DISPLAY}
-      build:
-        context: .
-        dockerfile: ./Docker/app/Dockerfile.app
-      tty: true
-      stdin_open: true
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile.app
+    tty: true
+    stdin_open: true
   server:
     privileged: true
     volumes:
@@ -20,6 +20,6 @@ services:
     network_mode: host
     build:
       context: .
-      dockerfile: ./Docker/server/Dockerfile.server
+      dockerfile: ./server/Dockerfile.server
     tty: true
     stdin_open: true
