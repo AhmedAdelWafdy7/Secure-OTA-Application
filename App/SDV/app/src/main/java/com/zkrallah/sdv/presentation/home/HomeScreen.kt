@@ -1,6 +1,7 @@
 package com.zkrallah.sdv.presentation.home
 
-import android.widget.Toast
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,19 +10,23 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -31,17 +36,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.zkrallah.sdv.BROKER_URL
+import com.zkrallah.sdv.R
 import com.zkrallah.sdv.domain.models.Message
+import com.zkrallah.sdv.presentation.intro.LoaderIntro
+import com.zkrallah.sdv.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
-    var mqttBroker by remember { mutableStateOf("") }
-    var secureConnection by remember { mutableStateOf(false) }
     var subscribeToTopic by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
     var topic by remember { mutableStateOf("") }
@@ -55,7 +65,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
     LaunchedEffect(uiMessage) {
         uiMessage?.let {
             if (it.isNotEmpty() && it.isNotBlank()) {
-                Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
+                showToast(context, it)
                 homeViewModel.clearUiMessage()
             }
         }
@@ -69,7 +79,13 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
     }
 
     Scaffold(topBar = {
-        CenterAlignedTopAppBar(title = { Text("Z-MQTT") })
+        TopAppBar(title = { Text(text = "SDV") }, actions = {
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = Icons.Default.Settings, contentDescription = "Settings"
+                )
+            }
+        })
     }) { paddingValues ->
         Column(
             modifier = Modifier
@@ -80,138 +96,238 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 if (!connectionStatus.value) {
-                    Text(
-                        text = "Connect to a Broker:",
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    OutlinedTextField(
-                        value = mqttBroker,
-                        onValueChange = { mqttBroker = it },
-                        placeholder = { Text("Enter MQTT Broker URL") },
+                    homeViewModel.connect(BROKER_URL, false)
+                } else {
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        Checkbox(
-                            checked = secureConnection,
-                            onCheckedChange = { secureConnection = it }
-                        )
-                        Text("Use Secure Connection (SSL/TLS)")
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.car),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .width(44.dp)
+                                    .height(33.dp)
+                            )
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column {
+                                Text(
+                                    text = "Tesla Model 3",
+                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                                )
+                                Text(
+                                    text = "Connected",
+                                    style = MaterialTheme.typography.bodyLarge.copy(color = Color.Green)
+                                )
+                            }
+                        }
                     }
 
-                    OutlinedButton(
-                        onClick = {
-                            homeViewModel.connect(mqttBroker, secureConnection)
-                            mqttBroker = ""
-                        }, modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(text = "Connect")
-                    }
-                } else {
-                    Text(text = "Z-Client", style = MaterialTheme.typography.headlineMedium)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        OutlinedTextField(
-                            value = subscribeToTopic,
-                            onValueChange = { subscribeToTopic = it },
-                            placeholder = { Text("Topic to subscribe") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)
-                        )
+                        if (true) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Row {
+                                    Text(
+                                        text = "Software Update",
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    )
 
-                        OutlinedButton(
-                            onClick = {
-                                homeViewModel.subscribeToTopic(subscribeToTopic)
-                                subscribeToTopic = ""
-                            }, modifier = Modifier.align(Alignment.CenterVertically)
-                        ) {
-                            Text(text = "Subscribe")
+                                    Text(
+                                        text = "Available",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Green)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Text(text = "Version 2025.4.2")
+
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text(text = "• Enhanced Autopilot features")
+                                Text(text = "• Improved battery optimizations")
+                                Text(text = "• Bug fixes and performance improvements")
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row {
+                                    Button(
+                                        onClick = { message = "" },
+                                        modifier = Modifier.weight(1f),
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                                    ) {
+                                        Text(text = "Install Update", color = Color.White)
+                                    }
+                                }
+                            }
+                        } else {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp)
+                            ) {
+                                Row {
+                                    Text(
+                                        text = "Software Update",
+                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    )
+
+                                    Text(
+                                        text = "Up to date",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                LoaderIntro(
+                                    modifier = Modifier
+                                        .size(200.dp)
+                                        .fillMaxWidth()
+                                        .align(alignment = Alignment.CenterHorizontally), R.raw.animation3
+                                )
+                            }
                         }
                     }
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        OutlinedTextField(
-                            value = message,
-                            onValueChange = { message = it },
-                            placeholder = { Text("Message") },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 8.dp)
-                        )
-
-                        OutlinedTextField(
-                            value = topic,
-                            onValueChange = { topic = it },
-                            placeholder = { Text("Topic") },
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    OutlinedButton(
-                        onClick = {
-                            homeViewModel.publishMessage(message, topic)
-                            message = ""
-                        }, modifier = Modifier.fillMaxWidth()
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+                        shape = RoundedCornerShape(12.dp)
                     ) {
-                        Text(text = "Publish")
-                    }
+                        Column(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Quick Actions",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Text(text = "Received Messages:", style = MaterialTheme.typography.titleLarge)
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    LazyColumn(modifier = Modifier.weight(1f)) {
-                        items(messages) { msg ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                elevation = CardDefaults.cardElevation(4.dp)
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Column(modifier = Modifier.padding(12.dp)) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    IconButton(
+                                        onClick = { /* Handle click */ },
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.lock),
+                                            contentDescription = "",
+                                            modifier = Modifier
+                                                .width(44.dp)
+                                                .height(33.dp)
+                                        )
+                                    }
                                     Text(
-                                        text = "Topic: ${msg.topic}",
-                                        style = MaterialTheme.typography.titleMedium
+                                        text = "Lock",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier.padding(top = 4.dp)
                                     )
-                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    IconButton(
+                                        onClick = { /* Handle click */ },
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.climate),
+                                            contentDescription = "",
+                                            modifier = Modifier
+                                                .width(44.dp)
+                                                .height(33.dp)
+                                        )
+                                    }
                                     Text(
-                                        text = msg.payload,
-                                        style = MaterialTheme.typography.bodyLarge
+                                        text = "Climate",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
+
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    IconButton(
+                                        onClick = { /* Handle click */ },
+                                        modifier = Modifier
+                                            .background(
+                                                color = MaterialTheme.colorScheme.primaryContainer,
+                                                shape = CircleShape
+                                            )
+                                    ) {
+                                        Image(
+                                            painter = painterResource(id = R.drawable.location),
+                                            contentDescription = "",
+                                            modifier = Modifier
+                                                .width(44.dp)
+                                                .height(33.dp)
+                                        )
+                                    }
+                                    Text(
+                                        text = "Location",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        modifier = Modifier.padding(top = 4.dp)
                                     )
                                 }
                             }
                         }
                     }
-                }
-            }
-
-            // Disconnect button (only shown when connected)
-            if (connectionStatus.value) {
-                OutlinedButton(
-                    onClick = { homeViewModel.disconnect() },
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.error),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                ) {
-                    Text(text = "Disconnect", color = MaterialTheme.colorScheme.onError)
                 }
             }
         }
