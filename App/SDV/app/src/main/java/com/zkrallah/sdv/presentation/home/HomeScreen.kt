@@ -16,24 +16,24 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,19 +45,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.zkrallah.sdv.BROKER_URL
 import com.zkrallah.sdv.R
-import com.zkrallah.sdv.domain.models.Message
 import com.zkrallah.sdv.presentation.intro.LoaderIntro
 import com.zkrallah.sdv.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
-    var subscribeToTopic by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    var topic by remember { mutableStateOf("") }
     val receivedMessage = homeViewModel.receivedMessage.collectAsState()
     val connectionStatus = homeViewModel.connectionStatus.collectAsState()
-    var messages by remember { mutableStateOf(listOf<Message>()) }
+    val isConnecting = homeViewModel.isConnecting.collectAsState()
+    val errorDialogMessage = homeViewModel.errorDialogMessage.collectAsState()
+
 
     val context = LocalContext.current
     val uiMessage by homeViewModel.uiMessage.collectAsState()
@@ -68,13 +66,6 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                 showToast(context, it)
                 homeViewModel.clearUiMessage()
             }
-        }
-    }
-
-    // Update messages whenever a new message is received
-    LaunchedEffect(receivedMessage.value) {
-        receivedMessage.value?.let { msg ->
-            messages = messages + msg
         }
     }
 
@@ -97,7 +88,36 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
             Column(modifier = Modifier.weight(1f)) {
                 if (!connectionStatus.value) {
                     homeViewModel.connect(BROKER_URL, false)
+
+                    if (isConnecting.value) {
+                        AlertDialog(
+                            onDismissRequest = {},
+                            confirmButton = {},
+                            title = { Text("Connecting...") },
+                            text = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Text("Trying to connect to your car.")
+                                }
+                            }
+                        )
+                    }
+
+                    if (errorDialogMessage.value != null) {
+                        AlertDialog(
+                            onDismissRequest = { homeViewModel.clearErrorMessage() },
+                            confirmButton = {
+                                TextButton(onClick = { homeViewModel.clearErrorMessage() }) {
+                                    Text("OK")
+                                }
+                            },
+                            title = { Text("Connection Failed") },
+                            text = { Text(errorDialogMessage.value ?: "") }
+                        )
+                    }
                 } else {
+                    homeViewModel.subscribeToTopic("ota/update_possible")
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -141,7 +161,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                             .padding(8.dp),
                         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                     ) {
-                        if (true) {
+                        if (receivedMessage.value != null) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -164,7 +184,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                Text(text = "Version 2025.4.2")
+                                Text(text = "Version ${receivedMessage.value!!.payload}")
 
                                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -176,7 +196,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
                                 Row {
                                     Button(
-                                        onClick = { message = "" },
+                                        onClick = { homeViewModel.publishMessage("yes", "ota/response") },
                                         modifier = Modifier.weight(1f),
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
@@ -212,7 +232,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                     modifier = Modifier
                                         .size(200.dp)
                                         .fillMaxWidth()
-                                        .align(alignment = Alignment.CenterHorizontally), R.raw.animation3
+                                        .align(alignment = Alignment.CenterHorizontally),
+                                    R.raw.animation3
                                 )
                             }
                         }
@@ -251,8 +272,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier
-                                            .background(
+                                        modifier = Modifier.background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )
@@ -278,8 +298,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier
-                                            .background(
+                                        modifier = Modifier.background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )
@@ -305,8 +324,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier
-                                            .background(
+                                        modifier = Modifier.background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )

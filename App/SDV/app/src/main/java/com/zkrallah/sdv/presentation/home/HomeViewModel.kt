@@ -21,14 +21,23 @@ class HomeViewModel @Inject constructor(
     val receivedMessage: StateFlow<Message?> = _receivedMessage
     private val _connectionStatus: MutableStateFlow<Boolean> = MutableStateFlow(false)
     val connectionStatus: StateFlow<Boolean> = _connectionStatus
+    private val _isConnecting = MutableStateFlow(false)
+    val isConnecting: StateFlow<Boolean> = _isConnecting
+    private val _errorDialogMessage = MutableStateFlow<String?>(null)
+    val errorDialogMessage: StateFlow<String?> = _errorDialogMessage
 
     fun connect(mqttBroker: String, isSecure: Boolean) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 homeRepository.connect(mqttBroker, isSecure, _connectionStatus, _receivedMessage)
                 _uiMessage.value = "Connected successfully to broker!"
+                _isConnecting.value = true
+                _connectionStatus.value = true
             } catch (e: Exception) {
                 _uiMessage.value = "Failed to connect: ${e.message}"
+                _errorDialogMessage.value = "Failed to connect: ${e.message}"
+            } finally {
+                _isConnecting.value = false
             }
         }
     }
@@ -55,7 +64,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun disconnect() {
+    private fun disconnect() {
         try {
             homeRepository.disconnect(_connectionStatus)
             _uiMessage.value = "Disconnected successfully"
@@ -66,6 +75,10 @@ class HomeViewModel @Inject constructor(
 
     fun clearUiMessage() {
         _uiMessage.value = ""
+    }
+
+    fun clearErrorMessage() {
+        _errorDialogMessage.value = null
     }
 
     override fun onCleared() {
