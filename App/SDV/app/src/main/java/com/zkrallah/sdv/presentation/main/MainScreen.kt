@@ -1,0 +1,64 @@
+package com.zkrallah.sdv.presentation.main
+
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.zkrallah.sdv.presentation.home.HomeScreen
+import com.zkrallah.sdv.presentation.intro.OnBoarding
+import com.zkrallah.sdv.presentation.intro.OnBoardingViewModel
+import kotlinx.coroutines.runBlocking
+
+@Composable
+fun AppNavigation(
+    onBoardingViewModel: OnBoardingViewModel = hiltViewModel()
+) {
+    runBlocking {
+        onBoardingViewModel.getStartingDestination()
+    }
+
+    val startingDestination = onBoardingViewModel.startingDestination.collectAsState()
+    SetupNavigation(
+        startingScreen = startingDestination.value
+    )
+}
+
+@Composable
+fun SetupNavigation(startingScreen: String) {
+    Surface(
+        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+    ) {
+        val navController = rememberNavController()
+        Scaffold { innerPadding ->
+            Box(
+                modifier = Modifier.padding(innerPadding)
+            ) {
+                Navigation(startingScreen, navController)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun Navigation(
+    startingScreen: String, navController: NavHostController
+) {
+    NavHost(navController = navController, startDestination = startingScreen) {
+        composable("onboarding") { OnBoarding(navController = navController) }
+        composable("home") {
+            HomeScreen()
+        }
+    }
+}
