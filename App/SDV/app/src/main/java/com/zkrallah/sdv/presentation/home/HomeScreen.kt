@@ -1,6 +1,5 @@
 package com.zkrallah.sdv.presentation.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -37,12 +36,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.ImageLoader
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.zkrallah.sdv.BROKER_URL
 import com.zkrallah.sdv.R
 import com.zkrallah.sdv.presentation.intro.LoaderIntro
@@ -59,6 +62,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
     val context = LocalContext.current
     val uiMessage by homeViewModel.uiMessage.collectAsState()
+
+    val imageLoader = ImageLoader.Builder(context)
+        .components {
+            add(SvgDecoder.Factory())
+        }
+        .build()
 
     LaunchedEffect(uiMessage) {
         uiMessage?.let {
@@ -130,12 +139,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.car),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .width(44.dp)
-                                    .height(33.dp)
+                            AsyncImage(
+                                model = ImageRequest.Builder(context)
+                                    .data("android.resource://${context.packageName}/raw/car")
+                                    .crossfade(true)
+                                    .build(),
+                                contentDescription = null,
+                                imageLoader = imageLoader,
+                                modifier = Modifier.size(64.dp),
+                                contentScale = ContentScale.Fit
                             )
 
                             Spacer(modifier = Modifier.width(12.dp))
@@ -277,12 +289,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 shape = CircleShape
                                             )
                                     ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.lock),
-                                            contentDescription = "",
-                                            modifier = Modifier
-                                                .width(44.dp)
-                                                .height(33.dp)
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data("android.resource://${context.packageName}/raw/lock")
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = null,
+                                            imageLoader = imageLoader,
+                                            modifier = Modifier.size(64.dp),
+                                            contentScale = ContentScale.Fit
                                         )
                                     }
                                     Text(
@@ -303,12 +318,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 shape = CircleShape
                                             )
                                     ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.climate),
-                                            contentDescription = "",
-                                            modifier = Modifier
-                                                .width(44.dp)
-                                                .height(33.dp)
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data("android.resource://${context.packageName}/raw/temp")
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = null,
+                                            imageLoader = imageLoader,
+                                            modifier = Modifier.size(64.dp),
+                                            contentScale = ContentScale.Fit
                                         )
                                     }
                                     Text(
@@ -329,12 +347,13 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 shape = CircleShape
                                             )
                                     ) {
-                                        Image(
-                                            painter = painterResource(id = R.drawable.location),
-                                            contentDescription = "",
-                                            modifier = Modifier
-                                                .width(44.dp)
-                                                .height(33.dp)
+                                        AsyncImage(
+                                            model = ImageRequest.Builder(context)
+                                                .data("android.resource://${context.packageName}/raw/location")
+                                                .crossfade(true)
+                                                .build(),
+                                            contentDescription = null,
+                                            imageLoader = imageLoader
                                         )
                                     }
                                     Text(
