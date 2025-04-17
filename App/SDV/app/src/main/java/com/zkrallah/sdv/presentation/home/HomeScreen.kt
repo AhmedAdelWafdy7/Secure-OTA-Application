@@ -255,7 +255,7 @@ fun UpdateStatusCard(receivedMessage: State<Message?>, publishMessage: (String, 
             when (val payload = receivedMessage.value?.payload) {
                 null, "" -> UpToDateView()
                 "updating" -> UpdatingView()
-                else -> UpdateAvailableView(payload, publishMessage)
+                else -> UpdateAvailableView(payload, publishMessage, receivedMessage.value?.payload)
             }
         }
     }
@@ -429,7 +429,7 @@ fun UpdatingView() {
 }
 
 @Composable
-fun UpdateAvailableView(version: String, publishMessage: (String, String) -> Unit) {
+fun UpdateAvailableView(version: String, publishMessage: (String, String) -> Unit, receivedMessage: String?) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Text(
             text = "Version $version", style = MaterialTheme.typography.bodyMedium
@@ -442,7 +442,7 @@ fun UpdateAvailableView(version: String, publishMessage: (String, String) -> Uni
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { publishMessage("yes", "ota/response") },
+            onClick = { publishMessage(receivedMessage ?: "yes", "ota/response") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
