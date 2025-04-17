@@ -1,7 +1,15 @@
 package com.zkrallah.sdv.presentation.home
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,6 +26,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -40,6 +49,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -52,8 +63,6 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.zkrallah.sdv.BROKER_URL
-import com.zkrallah.sdv.presentation.main.UpToDateView
-import com.zkrallah.sdv.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,7 +85,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
     LaunchedEffect(uiMessage) {
         uiMessage?.let {
             if (it.isNotEmpty() && it.isNotBlank()) {
-                showToast(context, it)
+//                showToast(context, it)
                 homeViewModel.clearUiMessage()
             }
         }
@@ -206,7 +215,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
                             Spacer(modifier = Modifier.height(12.dp))
 
-                            if (receivedMessage.value != null) {
+                            if (receivedMessage.value != null && receivedMessage.value!!.payload != "updating" && receivedMessage.value!!.payload != "") {
                                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(
                                         text = "Version ${receivedMessage.value!!.payload}",
@@ -230,6 +239,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                         Text(text = "Install Update", color = Color.White)
                                     }
                                 }
+                            } else if (receivedMessage.value != null && receivedMessage.value!!.payload == "updating") {
+                                UpdatingView()
                             } else {
                                 UpToDateView()
                             }
@@ -315,7 +326,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                         )
                                     }
                                     Text(
-                                        text = "Climate",
+                                        text = "Weather",
                                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                                         modifier = Modifier.padding(top = 8.dp)
                                     )
@@ -357,6 +368,127 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                 }
             }
         }
+    }
+}
+
+
+@Composable
+fun UpToDateView() {
+    // Define size range for pulsing animation
+    val minSize = 40f
+    val maxSize = 60f
+
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val size by infiniteTransition.animateFloat(
+        initialValue = minSize,
+        targetValue = maxSize,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 1000),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "Pulse animation"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Container with fixed maximum size to prevent layout shifts
+        Box(
+            modifier = Modifier.size(maxSize.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.CheckCircle,
+                contentDescription = "Up to date",
+                tint = Color(0xFF4CAF50),
+                modifier = Modifier.size(size.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Your system is up to date!",
+            style = MaterialTheme.typography.bodyLarge.copy(color = Color(0xFF4CAF50))
+        )
+    }
+}
+
+
+@Composable
+fun UpdatingView() {
+    // Animation parameters
+    val infiniteTransition = rememberInfiniteTransition(label = "")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "Rotation animation"
+    )
+
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 0.9f,
+        targetValue = 1.1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "Pulse animation"
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Container with progress indicator and rotating download icon
+        Box(
+            modifier = Modifier.size(80.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            // Background progress indicator
+            CircularProgressIndicator(
+                modifier = Modifier.size(80.dp),
+                color = Color.LightGray,
+                strokeWidth = 2.dp
+            )
+
+            // Rotating download icon with pulse effect
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = "Downloading update",
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier
+                    .size(40.dp)
+                    .scale(pulseScale)
+                    .rotate(rotation)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Installing system update...",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            text = "This may take several minutes",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
     }
 }
 
