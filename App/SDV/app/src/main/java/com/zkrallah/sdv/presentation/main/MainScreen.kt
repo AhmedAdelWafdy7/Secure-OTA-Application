@@ -3,7 +3,6 @@ package com.zkrallah.sdv.presentation.main
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -16,9 +15,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -51,24 +50,26 @@ fun AppNavigation(
 @Composable
 fun SetupNavigation(startingScreen: String) {
     Surface(
-        modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
     ) {
         val navController = rememberNavController()
         val navBackStackEntry by navController.currentBackStackEntryAsState()
+
         Scaffold(
             bottomBar = {
                 if (ROUTES.contains(navBackStackEntry?.destination?.route)) {
-                    NavigationBar(containerColor = Color(0xFFD9D9D9)) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                        tonalElevation = 4.dp
+                    ) {
                         SCREENS.forEach { item ->
                             val selected = item.route == navBackStackEntry?.destination?.route
                             NavigationBarItem(
                                 selected = selected,
-                                label = {
-                                    Text(item.name, fontSize = 16.sp, fontWeight = FontWeight.Medium)
-                                },
                                 onClick = {
 //                                    navController.navigate(item.route) {
-//                                        popUpTo(navController.graph.findStartDestination().id) {
+//                                        popUpTo(navController.graph.startDestinationId) {
 //                                            saveState = true
 //                                        }
 //                                        launchSingleTop = true
@@ -77,19 +78,28 @@ fun SetupNavigation(startingScreen: String) {
                                 },
                                 icon = {
                                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        if (selected) {
-                                            Icon(
-                                                painter = painterResource(id = item.selectedIcon),
-                                                contentDescription = "Log Out"
-                                            )
-                                        } else {
-                                            Icon(
-                                                painter = painterResource(id = item.unSelectedIcon),
-                                                contentDescription = "Log Out"
-                                            )
-                                        }
+                                        Icon(
+                                            painter = painterResource(id = if (selected) item.selectedIcon else item.unSelectedIcon),
+                                            contentDescription = item.name,
+                                            tint = if (selected)
+                                                MaterialTheme.colorScheme.primary
+                                            else
+                                                MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                }
+                                },
+                                label = {
+                                    Text(
+                                        text = item.name,
+                                        fontSize = 12.sp,
+                                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                                        color = if (selected)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                },
+                                alwaysShowLabel = true
                             )
                         }
                     }
@@ -97,14 +107,13 @@ fun SetupNavigation(startingScreen: String) {
             }
         ) { innerPadding ->
             Box(
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.fillMaxSize()
             ) {
                 Navigation(startingScreen, navController)
             }
         }
     }
 }
-
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun Navigation(

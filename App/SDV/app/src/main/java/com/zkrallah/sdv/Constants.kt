@@ -10,19 +10,19 @@ const val BROKER_URL = "tcp://192.168.1.3:1883"
 val SCREENS = listOf(
     BottomNavItem(
         "Home",
-        "Home",
+        "home",
         selectedIcon = R.drawable.ic_home_filled,
         unSelectedIcon = R.drawable.ic_home_outlined
     ),
     BottomNavItem(
         "History",
-        "History",
+        "history",
         selectedIcon = R.drawable.ic_history_filled,
         unSelectedIcon = R.drawable.ic_history_filled
     ),
     BottomNavItem(
         "Account",
-        "Account",
+        "account",
         selectedIcon = R.drawable.ic_person_filled,
         unSelectedIcon = R.drawable.ic_person_outlined
     ),

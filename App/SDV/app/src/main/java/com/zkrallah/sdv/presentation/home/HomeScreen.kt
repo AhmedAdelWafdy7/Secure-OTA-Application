@@ -5,14 +5,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -35,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -47,8 +52,7 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.zkrallah.sdv.BROKER_URL
-import com.zkrallah.sdv.R
-import com.zkrallah.sdv.presentation.intro.LoaderIntro
+import com.zkrallah.sdv.presentation.main.UpToDateView
 import com.zkrallah.sdv.showToast
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -78,7 +82,9 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
         }
     }
 
-    Scaffold(topBar = {
+    Scaffold(
+        contentWindowInsets = WindowInsets.systemBars,
+        topBar = {
         TopAppBar(title = { Text(text = "SDV") }, actions = {
             IconButton(onClick = { }) {
                 Icon(
@@ -90,11 +96,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.Top
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState())) {
                 if (!connectionStatus.value) {
                     homeViewModel.connect(BROKER_URL, false)
 
@@ -130,13 +137,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                     ) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(12.dp),
+                                .padding(16.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             AsyncImage(
@@ -144,114 +152,89 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                     .data("android.resource://${context.packageName}/raw/car")
                                     .crossfade(true)
                                     .build(),
-                                contentDescription = null,
+                                contentDescription = "Car image",
                                 imageLoader = imageLoader,
-                                modifier = Modifier.size(64.dp),
-                                contentScale = ContentScale.Fit
+                                modifier = Modifier
+                                    .size(72.dp)
+                                    .clip(RoundedCornerShape(12.dp)),
+                                contentScale = ContentScale.Crop
                             )
 
-                            Spacer(modifier = Modifier.width(12.dp))
+                            Spacer(modifier = Modifier.width(16.dp))
 
-                            Column {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = "Tesla Model 3",
-                                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold)
+                                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                                 )
                                 Text(
                                     text = "Connected",
-                                    style = MaterialTheme.typography.bodyLarge.copy(color = Color.Green)
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = Color(0xFF4CAF50))
                                 )
                             }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
 
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
                     ) {
-                        if (receivedMessage.value != null) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row {
+                                Text(
+                                    text = "Software Update",
+                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.weight(1f)
+                                )
+
+                                Text(
+                                    text = if (receivedMessage.value != null) "Available" else "Up to date",
+                                    style = MaterialTheme.typography.bodyLarge.copy(
+                                        color = if (receivedMessage.value != null) Color(0xFF4CAF50) else Color(0xFF2196F3)
+                                    )
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(12.dp))
+
+                            if (receivedMessage.value != null) {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Text(
-                                        text = "Software Update",
-                                        style = MaterialTheme.typography.headlineSmall.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier.weight(1f)
+                                        text = "Version ${receivedMessage.value!!.payload}",
+                                        style = MaterialTheme.typography.bodyMedium
                                     )
 
-                                    Text(
-                                        text = "Available",
-                                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Green)
-                                    )
-                                }
+                                    Text(text = "• Enhanced Autopilot features")
+                                    Text(text = "• Improved battery optimizations")
+                                    Text(text = "• Bug fixes and performance improvements")
 
-                                Spacer(modifier = Modifier.height(8.dp))
+                                    Spacer(modifier = Modifier.height(16.dp))
 
-                                Text(text = "Version ${receivedMessage.value!!.payload}")
-
-                                Spacer(modifier = Modifier.height(12.dp))
-
-                                Text(text = "• Enhanced Autopilot features")
-                                Text(text = "• Improved battery optimizations")
-                                Text(text = "• Bug fixes and performance improvements")
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                Row {
                                     Button(
                                         onClick = { homeViewModel.publishMessage("yes", "ota/response") },
-                                        modifier = Modifier.weight(1f),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(48.dp),
                                         shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.buttonColors(containerColor = Color.Blue)
+                                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2))
                                     ) {
                                         Text(text = "Install Update", color = Color.White)
                                     }
                                 }
-                            }
-                        } else {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                            ) {
-                                Row {
-                                    Text(
-                                        text = "Software Update",
-                                        style = MaterialTheme.typography.headlineSmall.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-
-                                    Text(
-                                        text = "Up to date",
-                                        style = MaterialTheme.typography.bodyLarge.copy(color = Color.Blue)
-                                    )
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                LoaderIntro(
-                                    modifier = Modifier
-                                        .size(200.dp)
-                                        .fillMaxWidth()
-                                        .align(alignment = Alignment.CenterHorizontally),
-                                    R.raw.animation3
-                                )
+                            } else {
+                                UpToDateView()
                             }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(12.dp))
 
                     Card(
                         modifier = Modifier
@@ -267,10 +250,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                         ) {
                             Text(
                                 text = "Quick Actions",
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                modifier = Modifier.padding(bottom = 8.dp)
+                                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(bottom = 16.dp)
                             )
 
                             Row(
@@ -284,10 +265,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier.background(
+                                        modifier = Modifier
+                                            .background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )
+                                            .padding(8.dp)
                                     ) {
                                         AsyncImage(
                                             model = ImageRequest.Builder(context)
@@ -296,14 +279,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 .build(),
                                             contentDescription = null,
                                             imageLoader = imageLoader,
-                                            modifier = Modifier.size(64.dp),
+                                            modifier = Modifier.size(56.dp),
                                             contentScale = ContentScale.Fit
                                         )
                                     }
                                     Text(
                                         text = "Lock",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        modifier = Modifier.padding(top = 4.dp)
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                        modifier = Modifier.padding(top = 8.dp)
                                     )
                                 }
 
@@ -313,10 +296,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier.background(
+                                        modifier = Modifier
+                                            .background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )
+                                            .padding(8.dp)
                                     ) {
                                         AsyncImage(
                                             model = ImageRequest.Builder(context)
@@ -325,14 +310,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 .build(),
                                             contentDescription = null,
                                             imageLoader = imageLoader,
-                                            modifier = Modifier.size(64.dp),
+                                            modifier = Modifier.size(56.dp),
                                             contentScale = ContentScale.Fit
                                         )
                                     }
                                     Text(
                                         text = "Climate",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        modifier = Modifier.padding(top = 4.dp)
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                        modifier = Modifier.padding(top = 8.dp)
                                     )
                                 }
 
@@ -342,10 +327,12 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                 ) {
                                     IconButton(
                                         onClick = { /* Handle click */ },
-                                        modifier = Modifier.background(
+                                        modifier = Modifier
+                                            .background(
                                                 color = MaterialTheme.colorScheme.primaryContainer,
                                                 shape = CircleShape
                                             )
+                                            .padding(8.dp)
                                     ) {
                                         AsyncImage(
                                             model = ImageRequest.Builder(context)
@@ -353,13 +340,15 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                                                 .crossfade(true)
                                                 .build(),
                                             contentDescription = null,
-                                            imageLoader = imageLoader
+                                            imageLoader = imageLoader,
+                                            modifier = Modifier.size(56.dp),
+                                            contentScale = ContentScale.Fit
                                         )
                                     }
                                     Text(
                                         text = "Location",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        modifier = Modifier.padding(top = 4.dp)
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                                        modifier = Modifier.padding(top = 8.dp)
                                     )
                                 }
                             }
