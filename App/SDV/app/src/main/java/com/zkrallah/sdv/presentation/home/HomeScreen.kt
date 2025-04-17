@@ -209,6 +209,24 @@ fun ConnectionStatusCard(context: Context, imageLoader: ImageLoader) {
 
 @Composable
 fun UpdateStatusCard(receivedMessage: State<Message?>, publishMessage: (String, String) -> Unit) {
+    val statusText: String
+    val statusColor: Color
+
+    when (receivedMessage.value?.payload) {
+        null, "" -> {
+            statusText = "Up to date"
+            statusColor = Color(0xFF2196F3)
+        }
+        "updating" -> {
+            statusText = "Updating"
+            statusColor = Color(0xFFFF9800)
+        }
+        else -> {
+            statusText = "Available"
+            statusColor = Color(0xFF4CAF50)
+        }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -227,12 +245,8 @@ fun UpdateStatusCard(receivedMessage: State<Message?>, publishMessage: (String, 
                 )
 
                 Text(
-                    text = if (receivedMessage.value != null) "Available" else "Up to date",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = if (receivedMessage.value != null) Color(0xFF4CAF50) else Color(
-                            0xFF2196F3
-                        )
-                    )
+                    text = statusText,
+                    style = MaterialTheme.typography.bodyLarge.copy(color = statusColor)
                 )
             }
 
