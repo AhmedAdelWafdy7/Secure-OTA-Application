@@ -110,4 +110,9 @@ dependencies {
     // MQTT
     implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+
+    // Compose + Coil
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    // SVG support
+    implementation("io.coil-kt:coil-svg:2.4.0")
 }
