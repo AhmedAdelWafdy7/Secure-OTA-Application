@@ -57,10 +57,6 @@ Once downloaded, the ECU validates the file using a SHA checksum. If valid, it c
 
 ![Architecture](Docs/images/ota_arch.png)
 
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/49824e7a-5f32-4cb5-b09e-180bfbe92a8a" alt="System Architecture Diagram" />
-</p>
-
 ---
 
 # Installation and Usage
