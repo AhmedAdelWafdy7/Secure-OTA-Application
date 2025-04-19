@@ -35,13 +35,13 @@ This OTA system is composed of four main components:
     Once uploaded, the server publishes the update meta-data to the `ota/update` topic.
 
 3. **ECU Receives Announcement**    
-    The `ECU` is already subscribed to the `ota/response` topic. Once it receives message, it publishes the update meta-data to the `ota/update_possible` topic as a retained message, notifying the app of a pending update.
+    The `ECU` is already subscribed to the `ota/response` topic. Once it receives the message, it publishes the update meta-data to the `ota/update_possible` topic as a retained message, notifying the app of a pending update.
 
 4. **App Displays Update**  
     The app, subscribed to the `ota/update_possible` topic, receives the new update announcement and shows update details in the UI. If the user clicked `install`, the app will publish the update meta-data to the `ota/response` topic.
 
 5. **ECU Initates Download**    
-    Subscribed to ota/response, the ECU reacts by downloading the update using `curl`:
+    Subscribed to `ota/response`, the ECU reacts by downloading the update using `curl`:
 
     ```bash
     curl -O https://<our-server-ip-address>:80/files/<update-file-version>.bin
@@ -49,7 +49,7 @@ This OTA system is composed of four main components:
     During the download, the `ECU` publishes "updating" to the `ota/update_possible` topic as a retained message. This informs the app that the update is in progress.
 
 6. **Validate and Finish**  
-Once downloaded, the ECU validates the file using a SHA checksum. If valid, it clears the update status by publishing an empty retained message to the ota/update_possible topic. This informs the app that the system is now up-to-date.
+Once downloaded, the ECU validates the file using a SHA checksum. If valid, it clears the update status by publishing an empty retained message to the `ota/update_possible` topic. This informs the app that the system is now up-to-date.
 
 ---
 
@@ -77,7 +77,7 @@ git clone https://github.com/muhammadzkralla/Secure-OTA-Application
 cd Secure-OTA-Application
 ```
 
-# Docker
+## Docker
 If you have docker installed, you can build the containers by:
 
 ```bash
