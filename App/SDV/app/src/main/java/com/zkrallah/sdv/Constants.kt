@@ -5,7 +5,7 @@ import android.widget.Toast
 import com.zkrallah.sdv.domain.models.BottomNavItem
 
 const val CLIENT_ID = "android_client"
-const val BROKER_URL = "tcp://192.168.1.3:1883"
+const val BROKER_URL = BuildConfig.MQTT_BROKER_URL
 
 val SCREENS = listOf(
     BottomNavItem(

@@ -1,9 +1,21 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
 }
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
+// Get the MQTT broker URL (or use empty string as default)
+val mqttBrokerUrl: String = localProperties.getProperty("mqtt.broker.url", "")
 
 android {
     namespace = "com.zkrallah.sdv"
@@ -20,6 +32,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        buildConfigField("String", "MQTT_BROKER_URL", "\"${mqttBrokerUrl}\"")
     }
 
     buildTypes {
@@ -39,6 +52,7 @@ android {
         jvmTarget = "1.8"
     }
     buildFeatures {
+        buildConfig = true
         compose = true
     }
     composeOptions {
