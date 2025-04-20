@@ -72,7 +72,6 @@ import com.zkrallah.sdv.domain.models.Message
 fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
     val receivedMessage = homeViewModel.receivedMessage.collectAsState()
     val connectionStatus = homeViewModel.connectionStatus.collectAsState()
-    val isConnecting = homeViewModel.isConnecting.collectAsState()
     val errorDialogMessage = homeViewModel.errorDialogMessage.collectAsState()
 
     val context = LocalContext.current
@@ -115,9 +114,9 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
                     homeViewModel.connect(BROKER_URL, false)
 
                     DisconnectedCard(
-                        isConnecting,
                         errorDialogMessage,
-                        homeViewModel::clearErrorMessage
+                        homeViewModel::clearErrorMessage,
+                        homeViewModel::connect
                     )
                 } else {
                     homeViewModel.subscribeToTopic("ota/update_possible")
@@ -135,11 +134,11 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
 
 @Composable
 fun DisconnectedCard(
-    isConnecting: State<Boolean>,
     errorDialogMessage: State<String?>,
-    clearErrorMessage: () -> Unit
+    clearErrorMessage: () -> Unit,
+    connect: (String, Boolean) -> Unit
 ) {
-    if (isConnecting.value) {
+    if (errorDialogMessage.value.isNullOrBlank()) {
         AlertDialog(onDismissRequest = {},
             confirmButton = {},
             title = { Text("Connecting...") },
@@ -150,13 +149,14 @@ fun DisconnectedCard(
                     Text("Trying to connect to your car.")
                 }
             })
-    }
-
-    if (errorDialogMessage.value != null) {
+    } else {
         AlertDialog(onDismissRequest = { clearErrorMessage() },
             confirmButton = {
-                TextButton(onClick = { clearErrorMessage() }) {
-                    Text("OK")
+                TextButton(onClick = {
+                    clearErrorMessage()
+                    connect(BROKER_URL, false)
+                }) {
+                    Text("Retry")
                 }
             },
             title = { Text("Connection Failed") },
