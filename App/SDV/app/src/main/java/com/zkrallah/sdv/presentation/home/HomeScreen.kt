@@ -91,7 +91,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = hiltViewModel()) {
     }
 
     Scaffold(contentWindowInsets = WindowInsets.systemBars, topBar = {
-        TopAppBar(title = { Text(text = "SDV") }, actions = {
+        TopAppBar(title = { Text(text = "Home") }, actions = {
             IconButton(onClick = { }) {
                 Icon(
                     imageVector = Icons.Default.Settings, contentDescription = "Settings"
@@ -195,7 +195,7 @@ fun ConnectionStatusCard(context: Context, imageLoader: ImageLoader) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Tesla Model 3",
+                    text = "My SDV",
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
                 )
                 Text(
