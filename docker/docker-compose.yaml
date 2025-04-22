@@ -3,24 +3,24 @@ services:
   app:
     privileged: true
     volumes:
-      - /home/wafdunix/SDV/app:/home
+      - ../App:/home
       - /tmp/.X11-unix:/tmp/.X11-unix
     network_mode: host
     environment:
       - DISPLAY=${DISPLAY}
     build:
       context: .
-      dockerfile: ./app/Dockerfile.app
+      dockerfile: ./dockerFile/app/Dockerfile.app
     tty: true
     stdin_open: true
   server:
     privileged: true
     volumes:
-      - /home/wafdunix/SDV/server:/home
+      - ../Server:/home
     network_mode: host
     build:
-      context: ..
-      dockerfile: ./Docker/server/Dockerfile.server
+      context: .
+      dockerfile: ./dockerFile/server/Dockerfile.server
     working_dir: /home
     tty: true
     stdin_open: true
