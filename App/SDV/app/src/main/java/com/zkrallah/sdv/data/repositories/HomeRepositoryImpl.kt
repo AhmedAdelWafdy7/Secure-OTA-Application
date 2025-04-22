@@ -3,8 +3,10 @@ package com.zkrallah.sdv.data.repositories
 import android.util.Log
 import com.zkrallah.sdv.CLIENT_ID
 import com.zkrallah.sdv.domain.models.Message
+import com.zkrallah.sdv.domain.models.UpdateResponse
 import com.zkrallah.sdv.domain.repositories.HomeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.serialization.json.Json
 import org.eclipse.paho.client.mqttv3.*
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence
 import javax.net.ssl.SSLSocketFactory
@@ -50,24 +52,34 @@ class HomeRepositoryImpl : HomeRepository {
     }
 
     private fun createMqttCallback(
-        connectionStatus: MutableStateFlow<Boolean>,
-        receivedMessage: MutableStateFlow<Message?>
+        connectionStatus: MutableStateFlow<Boolean>, receivedMessage: MutableStateFlow<Message?>
     ): MqttCallback {
         return object : MqttCallback {
             override fun messageArrived(topic: String, message: MqttMessage) {
+                val payloadString = String(message.payload)
+
+                val parsedVersion = try {
+                    val update = Json.decodeFromString<UpdateResponse>(payloadString)
+                    Log.d(TAG, "Parsed JSON: $update")
+                    update.version
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to parse payload: $payloadString", e)
+                    // fallback to payload string if parsing fails
+                    payloadString
+                }
+
                 val msg = Message(
                     message.id,
                     topic,
-                    String(message.payload),
+                    parsedVersion,
                     message.qos,
                     message.isDuplicate,
                     message.isRetained
                 )
+
                 receivedMessage.value = msg
-                Log.d(
-                    TAG,
-                    "messageArrived: RECEIVED ${String(message.payload)} from $topic"
-                )
+
+                Log.d(TAG, "messageArrived: RECEIVED $parsedVersion from $topic")
             }
 
             override fun connectionLost(cause: Throwable?) {

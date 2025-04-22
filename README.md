@@ -28,7 +28,7 @@ This OTA system is composed of four main components:
    A new update file is uploaded to the server using `curl`:
 
    ```bash
-   curl -F "file=@<update-file-version>.bin" https://<our-server-ip-address>:80/upload
+   curl -F "file=@<update-file-path>.bin" -F "version=<update-version>" >https://<our-server-ip-address>:5000/upload
    ```
 
 2. **Announcing the New Update**    
@@ -44,7 +44,7 @@ This OTA system is composed of four main components:
     Subscribed to `ota/response`, the ECU reacts by downloading the update using `curl`:
 
     ```bash
-    curl -O https://<our-server-ip-address>:80/files/<update-file-version>.bin
+    curl -O https://<our-server-ip-address>:5000/files/<update-file-path>.bin
     ```
     During the download, the `ECU` publishes "updating" to the `ota/update_possible` topic as a retained message. This informs the app that the update is in progress.
 
