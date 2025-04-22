@@ -55,14 +55,18 @@ class RawData(Resource):
 
 @app.route("/upload", methods=["POST"])
 def upload():
-    print("here")
     if "file" not in request.files:
         return "No file part"
 
-    print("herer")
     file = request.files["file"]
     if file.filename == "":
         return "No selected file"
+    
+    version = request.form.get("version")
+    if not version or version == "":
+        return "No specified version"
+
+    print(f"Received version: {version}")
 
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(file_path)
@@ -74,11 +78,11 @@ def upload():
             sha256.update(block)
 
     checksum = sha256.hexdigest()
-    payload = {"file": file_name, "checksum": checksum}
+    payload = {"file": file_name, "version": version, "checksum": checksum}
 
     payload_str = json.dumps(payload)
     print(checksum)
-    publish.single("ota/update_possible", payload_str, hostname="localhost", port=1883)
+    publish.single("ota/update_possible", payload_str, hostname="localhost", port=1883, retain=True)
     publish.single("ota/update", payload_str, hostname="localhost", port=1883)
 
     return "Upload success"
