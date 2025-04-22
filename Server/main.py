@@ -67,18 +67,19 @@ def upload():
     file_path = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(file_path)
 
-    file_url = f"http://0.0.0.0/files/{file.filename}"
+    file_name = file.filename
     sha256 = hashlib.sha256()
     with open(file_path, "rb") as f:
         for block in iter(lambda: f.read(4096), b""):
             sha256.update(block)
 
     checksum = sha256.hexdigest()
-    payload = {"url": file_url, "checksum": checksum}
+    payload = {"file": file_name, "checksum": checksum}
 
     payload_str = json.dumps(payload)
     print(checksum)
-    publish.single("ota/update", payload_str, hostname="0.0.0.0", port=1883)
+    publish.single("ota/update_possible", payload_str, hostname="localhost", port=1883)
+    publish.single("ota/update", payload_str, hostname="localhost", port=1883)
 
     return "Upload success"
 
@@ -93,4 +94,4 @@ def download(filename):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=80)
+    app.run(debug=True, host="0.0.0.0", port=5000)
