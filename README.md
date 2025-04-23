@@ -51,6 +51,21 @@ This OTA system is composed of four main components:
 6. **Validate and Finish**  
 Once downloaded, the ECU validates the file using a SHA checksum. If valid, it clears the update status by publishing an empty retained message to the `ota/update_possible` topic. This informs the app that the system is now up-to-date.
 
+# App Preview:
+
+<table align="center">
+  <tr>
+    <td><img src="Docs/images/screen1_light.jpg"/></td>
+    <td><img src="Docs/images/screen2_light.jpg"/></td>
+    <td><img src="Docs/images/screen3_light.jpg"/></td>
+  </tr>
+  <tr>
+    <td><img src="Docs/images/screen1_dark.jpg"/></td>
+    <td><img src="Docs/images/screen2_dark.jpg"/></td>
+    <td><img src="Docs/images/screen3_dark.jpg"/></td>
+  </tr>
+</table>
+
 ---
 
 # System Architecture
