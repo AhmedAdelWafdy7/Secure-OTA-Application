@@ -55,14 +55,14 @@ Once downloaded, the ECU validates the file using a SHA checksum. If valid, it c
 
 <table align="center">
   <tr>
-    <td><img src="Docs/images/screen1_light.jpg" width="200"/></td>
-    <td><img src="Docs/images/screen2_light.jpg" width="200"/></td>
-    <td><img src="Docs/images/screen3_light.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen1_light.jpg"/></td>
+    <td><img src="Docs/images/screen2_light.jpg"/></td>
+    <td><img src="Docs/images/screen3_light.jpg"/></td>
   </tr>
   <tr>
-    <td><img src="Docs/images/screen1_dark.jpg" width="200"/></td>
-    <td><img src="Docs/images/screen2_dark.jpg" width="200"/></td>
-    <td><img src="Docs/images/screen3_dark.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen1_dark.jpg"/></td>
+    <td><img src="Docs/images/screen2_dark.jpg"/></td>
+    <td><img src="Docs/images/screen3_dark.jpg"/></td>
   </tr>
 </table>
 
