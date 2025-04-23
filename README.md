@@ -52,35 +52,18 @@ This OTA system is composed of four main components:
 Once downloaded, the ECU validates the file using a SHA checksum. If valid, it clears the update status by publishing an empty retained message to the ota/update_possible topic. This informs the app that the system is now up-to-date.
 
 # App Preview:
-<table align="center">
-  <tr>
-    <td> 
-        ![screen1_light](Docs/images/screen1_light.jpg)
-    </td>
-    <td>
-        ![screen2_light](Docs/images/screen2_light.jpg)
-    </td>
-    <td>
-        ![screen3_light](Docs/images/screen3_light.jpg)
-    </td>
-  </tr>
 
-</table>
+**Light Mode**
 
-<table align="center">
-  <tr>
-    <td> 
-        ![screen1_dark](Docs/images/screen1_dark.jpg)
-    </td>
-    <td>
-        ![screen2_dark](Docs/images/screen2_dark.jpg)
-    </td>
-    <td>
-        ![screen3_dark](Docs/images/screen3_dark.jpg)
-    </td>
-  </tr>
+![screen1_light](Docs/images/screen1_light.jpg)
+![screen2_light](Docs/images/screen2_light.jpg)
+![screen3_light](Docs/images/screen3_light.jpg)
 
-</table>
+**Dark Mode**
+
+![screen1_dark](Docs/images/screen1_dark.jpg)
+![screen2_dark](Docs/images/screen2_dark.jpg)
+![screen3_dark](Docs/images/screen3_dark.jpg)
 
 ---
 
