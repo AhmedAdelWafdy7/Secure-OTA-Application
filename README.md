@@ -53,17 +53,18 @@ Once downloaded, the ECU validates the file using a SHA checksum. If valid, it c
 
 # App Preview:
 
-**Light Mode**
-
-![screen1_light](Docs/images/screen1_light.jpg)
-![screen2_light](Docs/images/screen2_light.jpg)
-![screen3_light](Docs/images/screen3_light.jpg)
-
-**Dark Mode**
-
-![screen1_dark](Docs/images/screen1_dark.jpg)
-![screen2_dark](Docs/images/screen2_dark.jpg)
-![screen3_dark](Docs/images/screen3_dark.jpg)
+<table align="center">
+  <tr>
+    <td><img src="Docs/images/screen1_light.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen2_light.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen3_light.jpg" width="200"/></td>
+  </tr>
+  <tr>
+    <td><img src="Docs/images/screen1_dark.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen2_dark.jpg" width="200"/></td>
+    <td><img src="Docs/images/screen3_dark.jpg" width="200"/></td>
+  </tr>
+</table>
 
 ---
 
