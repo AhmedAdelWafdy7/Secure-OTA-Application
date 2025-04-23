@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 
     mosquitto_connect_callback_set(mosq, on_connect);
     mosquitto_message_callback_set(mosq, on_message);
-    if (mosquitto_connect(mosq,"local_host", 1883, 60) != MOSQ_ERR_SUCCESS) {
+    if (mosquitto_connect(mosq,"54.93.41.255", 1883, 60) != MOSQ_ERR_SUCCESS) {
         std::cerr << "Failed to connect to MQTT broker" << std::endl;
         return 1;
     }
